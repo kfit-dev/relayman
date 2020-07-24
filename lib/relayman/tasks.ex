@@ -1,9 +1,9 @@
 defmodule Relayman.Task do
   alias Relayman.EventStore
 
-  def clear_sources do
+  def prune_sources do
     start()
-    EventStore.clear_sources()
+    EventStore.prune_sources()
   end
 
   def list_sources do

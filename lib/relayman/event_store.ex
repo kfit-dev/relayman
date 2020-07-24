@@ -2,7 +2,9 @@ defmodule Relayman.EventStore do
   alias RelaymanWeb.Endpoint
   alias Redis.Command, as: CMD
 
-  def create(event) do
+  @ttl :timer.hours(1)
+
+  def create(event, ttl // @ttl) do
     event = Map.put(event, :id, UUID.uuid4())
     timestamp = DateTime.utc_now() |> DateTime.to_unix(:millisecond)
     source = "source:#{event[:source]}"
@@ -10,7 +12,7 @@ defmodule Relayman.EventStore do
 
     transaction =
       Redis.transaction([
-        CMD.set(event.id, event, ~w[PX #{:timer.hours(24)}]),
+        CMD.set(event.id, event, ~w[PX #{ttl}]),
         CMD.zadd(source, timestamp, event.id)
       ])
 
@@ -32,12 +34,21 @@ defmodule Relayman.EventStore do
   end
 
   def list_sources do
-    Redis.command(CMD.keys("source:*"))
+    case Redis.command(CMD.keys("source:*")) do
+      {:ok, sources} when is_list(sources) ->
+        {:ok, sources}
+      {:ok, _} ->
+        {:ok, []}
+      any -> any
+    end
   end
 
-  def clear_sources do
-    with {:ok, keys} <- list_sources() do
-      Redis.transaction(Enum.map(keys, &CMD.delete/1))
+  def prune_sources(ttl \\ @ttl) do
+    with {:ok, sources} <- list_sources() do
+      Enum.each(sources, fn source ->
+        score = :os.system_time(:millisecond) - ttl
+        Redis.command(CMD.zremrange_by_score_lt(source, score))
+      end)
     end
   end
 end
