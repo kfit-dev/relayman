@@ -35,7 +35,8 @@ defmodule Relayman.Application do
     base_opts = [name: RelaymanWeb.PubSub]
 
     case System.fetch_env("RELAYMAN_PUBSUB_ADAPTER") do
-      {:ok, "redis"} -> redis_opts(base_opts)
+      {:ok, "redis"} ->
+        redis_opts(base_opts)
       {:ok, _} -> base_opts
       :error -> base_opts
     end
@@ -51,6 +52,6 @@ defmodule Relayman.Application do
     |> Redis.opts()
     |> Keyword.put(:adapter, Phoenix.PubSub.Redis)
     |> Keyword.put(:redis_pool_size, pool_size)
-    |> Keyword.put(:node, System.fetch_env!("RELEASE_NODE"))
+    |> Keyword.put(:node_name, System.fetch_env!("RELEASE_NODE"))
   end
 end

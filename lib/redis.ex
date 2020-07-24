@@ -25,18 +25,18 @@ defmodule Redis do
     |> Keyword.put(:socket_opts, socket_opts())
   end
 
-  defp socket_opts(base_opts \\ []) do
+  defp socket_opts do
     case System.fetch_env("RELAYMAN_REDIS_SOCKET_OPTSET") do
       {:ok, "elasticache"} ->
-        Keyword.put(base_opts, :socket_opts, [
+        [
           customize_hostname_check: [
             match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
           ]
-        ])
+        ]
       {:ok, _} ->
-        base_opts
+        []
       :error ->
-        base_opts
+        []
     end
   end
 
