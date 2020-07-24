@@ -4,7 +4,7 @@ defmodule Relayman.EventStore do
 
   def create(event, ttl \\ default_ttl()) do
     event = Map.put(event, :id, UUID.uuid4())
-    timestamp = :os.system_time(:millisecond)
+    timestamp = System.monotonic_time(:millisecond)
     source = "source:#{event[:source]}"
     type = event[:type]
 
@@ -31,25 +31,16 @@ defmodule Relayman.EventStore do
     end
   end
 
-  def list_sources do
-    case Redis.command(CMD.keys("source:*")) do
-      {:ok, sources} when is_list(sources) ->
-        {:ok, sources}
-
-      {:ok, _} ->
-        {:ok, []}
-
-      any ->
-        any
-    end
+  def list_sources! do
+    Redis.command!(CMD.keys("source:*"))
   end
 
-  def prune_sources(ttl \\ default_ttl()) do
-    with {:ok, sources} <- list_sources() do
-      for source <- sources do
-        score = :os.system_time(:millisecond) - ttl
-        Redis.command(CMD.zremrange_by_score_lt(source, score))
-      end
+  def prune_sources!(ttl \\ default_ttl()) do
+    score = System.monotonic_time(:millisecond) - ttl
+    sources = list_sources!()
+
+    for source <- sources do
+      Redis.command!(CMD.zremrange_by_score_lt(source, score))
     end
   end
 

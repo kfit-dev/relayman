@@ -5,6 +5,10 @@ defmodule Redis do
     Redix.child_spec(merged_opts)
   end
 
+  def start_link do
+    Redix.start_link(opts(name: __MODULE__))
+  end
+
   def opts(base_opts \\ []) do
     host = System.get_env("RELAYMAN_REDIS_HOST", "127.0.0.1")
 
@@ -33,8 +37,10 @@ defmodule Redis do
             match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
           ]
         ]
+
       {:ok, _} ->
         []
+
       :error ->
         []
     end
@@ -44,7 +50,15 @@ defmodule Redis do
     Redix.command(__MODULE__, cmd, opts)
   end
 
+  def command!(cmd, opts \\ []) do
+    Redix.command!(__MODULE__, cmd, opts)
+  end
+
   def transaction(cmds) do
     Redix.transaction_pipeline(__MODULE__, cmds)
+  end
+
+  def transaction!(cmds) do
+    Redix.transaction_pipeline!(__MODULE__, cmds)
   end
 end
