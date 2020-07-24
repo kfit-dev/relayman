@@ -4,7 +4,7 @@ defmodule Relayman.EventStore do
 
   def create(event, ttl \\ default_ttl()) do
     event = Map.put(event, :id, UUID.uuid4())
-    timestamp = System.monotonic_time(:millisecond)
+    timestamp = System.system_time(:millisecond)
     source = "source:#{event[:source]}"
     type = event[:type]
 
@@ -36,7 +36,7 @@ defmodule Relayman.EventStore do
   end
 
   def prune_sources!(ttl \\ default_ttl()) do
-    score = System.monotonic_time(:millisecond) - ttl
+    score = System.system_time(:millisecond) - ttl
     sources = list_sources!()
 
     for source <- sources do

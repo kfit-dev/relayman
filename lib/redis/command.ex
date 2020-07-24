@@ -26,7 +26,7 @@ defmodule Redis.Command do
   end
 
   def zadd_timeseries(set, term, opts \\ []) do
-    zadd(set, :os.system_time(:millisecond), term, opts)
+    zadd(set, System.system_time(:millisecond), term, opts)
   end
 
   def zscore(set, term) do
@@ -58,7 +58,7 @@ defmodule Redis.Command do
   end
 
   def zremrange_by_score_gt(set, score, opts \\ []) do
-    zremrange_by_score(set, "(#{score}", "+inf", opts)
+    zremrange_by_score(set, ")#{score}", "+inf", opts)
   end
 
   def zremrange_by_score_lt(set, score, opts \\ []) do

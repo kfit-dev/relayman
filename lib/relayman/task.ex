@@ -20,11 +20,11 @@ defmodule Relayman.Task do
 
     Logger.info("Starting...")
 
-    start = System.monotonic_time(:millisecond)
+    start = System.system_time(:millisecond)
 
     fun.()
 
-    stop = System.monotonic_time(:millisecond)
+    stop = System.system_time(:millisecond)
 
     Logger.info("Finished in #{stop - start}ms")
   end
