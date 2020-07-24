@@ -21,9 +21,9 @@ defmodule Relayman.EventStore do
   end
 
   def read_from(source, event_id) do
-    with {:ok, score} when is_binary(score) <-
+    with {:ok, score} <-
            Redis.command(CMD.zscore("source:#{source}", event_id)),
-         {:ok, event_ids} when is_list(event_ids) <-
+         {:ok, event_ids} <-
            Redis.command(CMD.zrange_by_score_gt("source:#{source}", score)),
          {:ok, events} <-
            Redis.command(CMD.multi_get(event_ids)) do
