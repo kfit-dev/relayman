@@ -29,7 +29,7 @@ defmodule Relayman.Task do
     stop = System.system_time(:millisecond)
 
     Logger.info("Finished in #{stop - start}ms")
-
+  after
     Application.stop(:relayman)
   end
 end
