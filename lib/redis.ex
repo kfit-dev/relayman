@@ -30,7 +30,7 @@ defmodule Redis do
       :error ->
         base_opts
 
-      "elasticache" ->
+      {:ok, "elasticache"} ->
         Keyword.put(base_opts, :socket_opts,
           customize_hostname_check: [
             match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
