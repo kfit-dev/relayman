@@ -3,15 +3,17 @@ defmodule Relayman.Task do
 
   require Logger
 
-  def prune_sources do
+  def prune_sources, do: prune!()
+
+  def prune! do
     perform(fn ->
-      Logger.info(inspect(EventStore.prune_sources!()))
+      Logger.info(inspect(EventStore.prune!()))
     end)
   end
 
-  def list_sources do
+  def list! do
     perform(fn ->
-      Logger.info(inspect(EventStore.list_sources!()))
+      Logger.info(inspect(EventStore.list!()))
     end)
   end
 
@@ -27,5 +29,7 @@ defmodule Relayman.Task do
     stop = System.system_time(:millisecond)
 
     Logger.info("Finished in #{stop - start}ms")
+
+    Application.stop(:relayman)
   end
 end

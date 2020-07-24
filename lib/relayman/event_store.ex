@@ -31,15 +31,14 @@ defmodule Relayman.EventStore do
     end
   end
 
-  def list_sources! do
+  def list! do
     Redis.command!(CMD.keys("source:*"))
   end
 
-  def prune_sources!(ttl \\ default_ttl()) do
+  def prune!(ttl \\ default_ttl()) do
     score = System.system_time(:millisecond) - ttl
-    sources = list_sources!()
 
-    for source <- sources do
+    for source <- list!() do
       Redis.command!(CMD.zremrange_by_score_lt(source, score))
     end
   end
