@@ -17,4 +17,4 @@ config :relayman, RelaymanWeb.Endpoint,
   secret_key_base: secret_key_base
 
 config :relayman, RelaymanWeb.Endpoint,
-  server: System.get_env("RELAYMAN_SERVER_ENABLED", "true") == true
+  server: System.get_env("RELAYMAN_SERVER_ENABLED", "true") == "true"
