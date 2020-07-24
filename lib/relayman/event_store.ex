@@ -2,9 +2,7 @@ defmodule Relayman.EventStore do
   alias RelaymanWeb.Endpoint
   alias Redis.Command, as: CMD
 
-  @ttl :timer.hours(1)
-
-  def create(event, ttl \\ @ttl) do
+  def create(event, ttl \\ default_ttl()) do
     event = Map.put(event, :id, UUID.uuid4())
     timestamp = :os.system_time(:millisecond)
     source = "source:#{event[:source]}"
@@ -37,18 +35,27 @@ defmodule Relayman.EventStore do
     case Redis.command(CMD.keys("source:*")) do
       {:ok, sources} when is_list(sources) ->
         {:ok, sources}
+
       {:ok, _} ->
         {:ok, []}
-      any -> any
+
+      any ->
+        any
     end
   end
 
-  def prune_sources(ttl \\ @ttl) do
+  def prune_sources(ttl \\ default_ttl()) do
     with {:ok, sources} <- list_sources() do
       for source <- sources do
         score = :os.system_time(:millisecond) - ttl
         Redis.command(CMD.zremrange_by_score_lt(source, score))
       end
     end
+  end
+
+  defp default_ttl do
+    "RELAYMAN_EVENT_TTL_MS"
+    |> System.get_env("#{:timer.hours(1)}")
+    |> String.to_integer()
   end
 end
