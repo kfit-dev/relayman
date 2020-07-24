@@ -4,9 +4,9 @@ defmodule Relayman.EventStore do
 
   @ttl :timer.hours(1)
 
-  def create(event, ttl // @ttl) do
+  def create(event, ttl \\ @ttl) do
     event = Map.put(event, :id, UUID.uuid4())
-    timestamp = DateTime.utc_now() |> DateTime.to_unix(:millisecond)
+    timestamp = :os.system_time(:millisecond)
     source = "source:#{event[:source]}"
     type = event[:type]
 
@@ -45,10 +45,10 @@ defmodule Relayman.EventStore do
 
   def prune_sources(ttl \\ @ttl) do
     with {:ok, sources} <- list_sources() do
-      Enum.each(sources, fn source ->
+      for source <- sources do
         score = :os.system_time(:millisecond) - ttl
         Redis.command(CMD.zremrange_by_score_lt(source, score))
-      end)
+      end
     end
   end
 end
