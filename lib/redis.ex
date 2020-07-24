@@ -33,9 +33,9 @@ defmodule Redis do
             match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
           ]
         ])
-      :error ->
-        base_opts
       {:ok, _} ->
+        base_opts
+      :error ->
         base_opts
     end
   end
