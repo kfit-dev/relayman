@@ -36,7 +36,7 @@ defmodule Relayman.Application do
 
     case System.fetch_env("RELAYMAN_PUBSUB_ADAPTER") do
       :error -> base_opts
-      "redis" -> redis_opts(base_opts)
+      {:ok, "redis"} -> redis_opts(base_opts)
     end
   end
 
