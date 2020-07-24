@@ -9,9 +9,9 @@ defmodule RelaymanWeb.SourceChannel do
   end
 
   def handle_info({:after_join, params}, socket) do
-    with last_event_id when not is_nil(last_event_id) <-
-           Map.get(params, "last_event_id"),
-         {:ok, events} when is_list(events) <-
+    with {:ok, last_event_id} <-
+           Map.fetch(params, "last_event_id"),
+         {:ok, events} <-
            EventStore.read_from(socket.assigns.source, params["last_event_id"]) do
       push(socket, "events", %{data: events})
     end
