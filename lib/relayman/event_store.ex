@@ -23,7 +23,7 @@ defmodule Relayman.EventStore do
   def read_from(source, event_id) do
     with {:ok, score} <-
            Redis.command(CMD.zscore("source:#{source}", event_id)),
-         {:ok, event_ids} <-
+         {:ok, event_ids} when length(event_ids) > 0 <-
            Redis.command(CMD.zrange_by_score_gt("source:#{source}", score)),
          {:ok, events} <-
            Redis.command(CMD.multi_get(event_ids)) do
