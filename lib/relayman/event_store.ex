@@ -21,13 +21,16 @@ defmodule Relayman.EventStore do
   end
 
   def read_from(source, event_id) do
-    with {:ok, score} <-
-           Redis.command(CMD.zscore("source:#{source}", event_id)),
-         {:ok, event_ids} when event_ids != [] <-
-           Redis.command(CMD.zrange_by_score_gt("source:#{source}", score)),
-         {:ok, events} <-
-           Redis.command(CMD.multi_get(event_ids)) do
+    with {:score, {:ok, score}} when not is_nil(score) <-
+           {:score, Redis.command(CMD.zscore("source:#{source}", event_id))},
+         {:range, {:ok, event_ids}} when event_ids != [] <-
+           {:range, Redis.command(CMD.zrange_by_score_gt("source:#{source}", score))},
+         {:get, {:ok, events}} <-
+           {:get, Redis.command(CMD.multi_get(event_ids))} do
       {:ok, Redis.Coder.decode(events)}
+    else
+      {:score, {:ok, nil}} -> {:ok, []}
+      {tag, exception} when tag in [:score, :range, :get] -> exception
     end
   end
 
