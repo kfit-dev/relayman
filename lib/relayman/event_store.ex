@@ -3,7 +3,7 @@ defmodule Relayman.EventStore do
   alias Redis.Command, as: CMD
 
   def create(event, ttl \\ default_ttl()) do
-    event = Map.put(event, :id, UUID.uuid4())
+    event = Map.put(event, :id, UUID.uuid1())
     timestamp = System.system_time(:millisecond)
     source = "source:#{event[:source]}"
     type = event[:type]
