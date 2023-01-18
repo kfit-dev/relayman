@@ -87,6 +87,18 @@ jobs:
           # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new-${{ matrix.gemfile }}
 
+      - name: Snyk Container Test
+        continue-on-error: true
+        uses: snyk/actions/docker@master
+        env:
+          SYNK_TOKEN: ${{secrets.SNYK_TOKEN}}
+        with:
+          image: ${{ needs.setup_env.outputs.container_image_uri }}
+          args: --file=Dockerfile
+      - name: Upload Container Scan results to Github Code Scanning
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: snyk.sarif
       - name: Move cache
         run: |
           rm -rf /tmp/.buildx-cache-${{ matrix.gemfile }}
