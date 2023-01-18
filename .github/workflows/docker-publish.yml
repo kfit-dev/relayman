@@ -1,6 +1,7 @@
 name: Build relayman
 
 on:
+  pull_request:
   push:
     branches:
       - master
@@ -30,7 +31,11 @@ jobs:
       - id: image_tag
         name: Setup image tags
         run: |
-          IMAGE_TAG=latest
+          if [[${{github.event_name}} != 'pull_request']]; then
+            IMAGE_TAG=latest
+          else
+            IMAGE_TAG=test
+          fi
           echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
           echo "container_image_uri=$ECR_REGISTRY/$ECR_BUILD_REPO:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
@@ -54,8 +59,8 @@ jobs:
       - name: Cache Docker layers
         uses: actions/cache@v3
         with:
-          path: /tmp/.buildx-cache-${{ matrix.gemfile }}
-          key: ${{ runner.os }}-multi-buildx-${{ github.sha }}-${{ matrix.gemfile }}
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-multi-buildx
 
@@ -81,11 +86,11 @@ jobs:
           file: Dockerfile
           push: true
           tags: ${{ env.CONTAINER_IMAGE_URI }}
-          cache-from: type=local,src=/tmp/.buildx-cache-${{ matrix.gemfile }}
+          cache-from: type=local,src=/tmp/.buildx-cache
           # Note the mode=max here
           # More: https://github.com/moby/buildkit#--export-cache-options
           # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new-${{ matrix.gemfile }}
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
 
       - name: Snyk Container Test
         continue-on-error: true
@@ -101,5 +106,5 @@ jobs:
           sarif_file: snyk.sarif
       - name: Move cache
         run: |
-          rm -rf /tmp/.buildx-cache-${{ matrix.gemfile }}
-          mv /tmp/.buildx-cache-new-${{ matrix.gemfile }} /tmp/.buildx-cache-${{ matrix.gemfile }}
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
