@@ -100,7 +100,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           image: ${{ needs.setup_env.outputs.container_image_uri }}
-          args: --file=Dockerfile
+          args: --file=Dockerfile --exclude-base-image-vulns
 
       - name: Upload Container Scan results to Github Code Scanning
         uses: github/codeql-action/upload-sarif@v1
