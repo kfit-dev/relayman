@@ -64,7 +64,6 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
-          provenance: false
+          tags: ${{ env.REGISTRY }}/${{env.IMAGE_NAME}}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
