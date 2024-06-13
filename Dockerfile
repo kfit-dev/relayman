@@ -26,7 +26,7 @@ RUN mix release
 
 FROM alpine:latest AS app
 
-RUN apk add --update --no-cache bash libcrypto1.1 libstdc++
+RUN apk add --update --no-cache bash openssl libstdc++
 
 WORKDIR /app
 
