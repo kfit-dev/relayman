@@ -24,7 +24,7 @@ COPY rel rel
 
 RUN mix release
 
-FROM alpine:latest AS app
+FROM alpine:3.16 AS app
 
 RUN apk add --update --no-cache bash openssl libstdc++
 
