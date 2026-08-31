@@ -30,6 +30,17 @@ defmodule Redis do
   end
 
   defp socket_opts do
+    verify_hostname? =
+      System.get_env("RELAYMAN_REDIS_SSL_VERIFY_HOSTNAME", "true") == "true"
+
+    if verify_hostname? do
+      hostname_check_opts()
+    else
+      [verify: :verify_none]
+    end
+  end
+
+  defp hostname_check_opts do
     case System.fetch_env("RELAYMAN_REDIS_SOCKET_OPTSET") do
       {:ok, "elasticache"} ->
         [
